@@ -25,7 +25,7 @@
 
         .links {
             position: absolute;
-            top: 0;
+            bottom: 0;
             right: 0;
             display: flex;
             align-items: center;
@@ -33,7 +33,9 @@
         }
 
         .title {
-            font-size: 3rem;
+            font-size: 2.5rem;
+            position: absolute;
+            top: 0;
         }
 
         .resume_form {
@@ -133,17 +135,44 @@
             animation-iteration-count: 1;
         }
 
+        .btn-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .parse-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #parse-error { 
+            color: red;
+            display: none;
+        }
+
     </style>
 </head>
 <body>
 <div class="container">
-    <div class="links">
-        <iframe  src="https://ghbtns.com/github-btn.html?user=felipeall&repo=resumeio-to-pdf&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
-        <a href="https://www.buymeacoffee.com/felipeall" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 160px !important;" ></a>
-    </div>
     <h1 class="title">Resume.io to PDF</h1>
+
+    <div class="parse-container">
+        <div class="btn-container">
+            <button id="resume-json" class="btn" type="button"><span id="">Get resume</span></button>
+            <button id="coverletters-json" class="btn" type="button"><span id="">Get Cover Letter</span></button>
+        </div>
+
+        <div style="display: flex;">
+            <input id="parse-json" type="text" class="resume" name="parse json" placeholder="Paste the json">
+        </div>
+
+        <h3 id="parse-error">Error: invalid Input, copy and paste the entire text</h3>
+    </div>
+
+
     <form method="post" class="resume_form" id="downloadForm">
-        <input type="text" class="resume" name="rendering_token" placeholder="Enter your resume `renderingToken'" aria-label="Id" maxlength="24">
+        <input id="renderingToken" type="text" class="resume" name="rendering_token" placeholder="Enter your resume `renderingToken'" aria-label="Id" maxlength="24">
         <span class="error">Your resume `renderingToken` must be a 24-character alphanumeric string</span>
         <button id="submit-btn" class="btn" type="submit"><span id="submit-text">Download</span>
             <svg id="loader" width="23" height="23" stroke="#fff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -153,6 +182,11 @@
             </svg>
         </button>
     </form>
+
+    <div class="links">
+        <iframe  src="https://ghbtns.com/github-btn.html?user=felipeall&repo=resumeio-to-pdf&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+        <a href="https://www.buymeacoffee.com/felipeall" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 160px !important;" ></a>
+    </div>
 </div>
 
 
@@ -191,6 +225,32 @@
         document.getElementById('loader').style.display = 'block';
         this.submit();
     });
+
+    document.querySelector('#resume-json').addEventListener('click', (e) => {
+        window.open('https://resume.io/api/app/resumes')
+    })
+
+    document.querySelector('#coverletters-json').addEventListener('click', (e) => {
+        window.open('https://resume.io/api/app/cover-letters')
+    })
+
+    const items = document.querySelector('#items')
+    const renderingTokenInput = document.querySelector('#renderingToken')
+    const parseError = document.querySelector('#parse-error')
+
+    document.querySelector('#parse-json').addEventListener('paste', (e) => {
+        parseError.style.display = 'none'
+        let paste = (event.clipboardData || window.clipboardData).getData("text");
+        try {
+            const data = JSON.parse(paste)
+            const data2 = data.resumes || data.coverLetters
+            const token = data2[0].renderingToken
+
+            renderingTokenInput.value = token
+        } catch (error) {
+            parseError.style.display = 'block'
+        }
+    })
 </script>
 </body>
 </html>
